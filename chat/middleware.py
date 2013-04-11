@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import hashlib
-from teamgames_services.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP
+from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP
 
 
 class TeamCalculator(object):

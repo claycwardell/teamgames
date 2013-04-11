@@ -6,8 +6,8 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'teamgames_services.views.home', name='home'),
-    # url(r'^teamgames_services/', include('teamgames_services.foo.urls')),
+    # url(r'^$', 'teamgames_site.views.home', name='home'),
+    # url(r'^teamgames_site/', include('teamgames_site.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -15,5 +15,5 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 
-    url(r'^chat/', include('teamgames_services.chat.urls')),
+    url(r'^chat/', include('chat.urls')),
 )
