@@ -10,6 +10,7 @@ from django.shortcuts import render_to_response
 
 
 #@require_GET
+from django.views.decorators.csrf import csrf_exempt
 from chat.decorators import jsonify
 
 def home(request):
@@ -19,10 +20,12 @@ def home(request):
 
 
 #@require_POST
+@csrf_exempt
 @jsonify
 def set_username(request):
-    post_data = simplejson.loads(request.body)
-    username = post_data.get("username")
+    pdb.set_trace()
+    username = request.POST.get("username")
+
     # check if available
     available = True
     if available:
