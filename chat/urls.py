@@ -5,7 +5,7 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns('chat',
     # Examples:
     # url(r'^$', 'teamgames_site.views.home', name='home'),
-    url(r'get_team/$', 'views.get_team',)
+    url(r'^$', 'views.home',)
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
