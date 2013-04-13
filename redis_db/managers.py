@@ -1,8 +1,8 @@
-import redis
+from redis import StrictRedis
 from teamgames_site.settings import REDIS_URL
 
 
-redis_client = redis.from_url(REDIS_URL, db=0)
+redis_client = StrictRedis.from_url(REDIS_URL)
 
 
 class RedisDbManager(object):
@@ -21,8 +21,6 @@ class RedisDbManager(object):
     def set(cls, id, obj):
         key = cls._get_key(id)
         return redis_client.set(key, obj)
-
-
 
 
 class UsernameManager(RedisDbManager):
