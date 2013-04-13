@@ -10,11 +10,20 @@ class RedisDbManager(object):
 
     @classmethod
     def _get_key(cls, id):
-        return "%s:%s" % (cls._prefix, id)
+        return "%s%s" % (cls._prefix, id)
 
     @classmethod
     def get(cls, id):
-        return redis_client.get(cls._get_key(id))
+        key = cls._get_key(id)
+        return redis_client.get(key)
 
     @classmethod
-    def set(cls):
+    def set(cls, id, obj):
+        key = cls._get_key(id)
+        return redis_client.set(key, obj)
+
+
+
+
+class UsernameManager(RedisDbManager):
+    _prefix = super(RedisDbManager, self)._prefix + "username:"
