@@ -24,4 +24,5 @@ class RedisDbManager(object):
 
 
 class UsernameManager(RedisDbManager):
-    _prefix = super(RedisDbManager, self)._prefix + "username:"
+#    _prefix = super(UsernameManager, self)._prefix + "username:"
+    pass
