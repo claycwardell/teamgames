@@ -65,7 +65,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -102,7 +102,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'chat.middleware.TeamCalculator',
+    'chat.middleware.MainMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -162,3 +162,9 @@ LOGGING = {
         },
     }
 }
+
+#PUSHER
+
+PUSHER_APP_ID =  '41450'
+PUSHER_KEY = 'ae35d633bac49aecadaf'
+PUSHER_SECRET = '0aeed0cdd5cfe2fd5acd'
