@@ -33,6 +33,10 @@ def set_username(request):
         request.session['username'] = username
     return {'success' : True}
 
+@csrf_exempt
+@jsonify
+def new_message(request):
+    pass
 
 
 
