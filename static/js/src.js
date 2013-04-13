@@ -23,3 +23,5 @@ $('#submit_button').on('click', function(e){
         }
     });
 });
+
+$('body').addClass(team);
