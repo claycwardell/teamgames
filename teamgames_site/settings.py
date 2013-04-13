@@ -162,3 +162,9 @@ LOGGING = {
         },
     }
 }
+
+#PUSHER
+
+PUSHER_APP_ID =  '41450'
+PUSHER_KEY = 'ae35d633bac49aecadaf'
+PUSHER_SECRET = '0aeed0cdd5cfe2fd5acd'
