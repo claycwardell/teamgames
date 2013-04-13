@@ -17,7 +17,7 @@ def jsonify(func):
 
 
 
-def username_required(func):
+def require_username(func):
     @functools.wraps(func)
     def wrap(request, *args, **kwargs):
         if not request.session.get("username"):

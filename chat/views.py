@@ -1,10 +1,12 @@
 from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP
+from teamgames_site.settings import PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET
 import pdb
 from django.shortcuts import render_to_response
+from decorators import jsonify, require_username
 
 import pusher
 
-pusher_instance = pusher.Pusher
+pusher_instance = pusher.Pusher(app_id=PUSHER_APP_ID, key=PUSHER_KEY, secret=PUSHER_SECRET)
 
 
 
@@ -35,6 +37,12 @@ def set_username(request):
 @csrf_exempt
 @require_username
 def new_message(request):
+    message = request.POST.get("message")
+    if message is not None:
+        team = request.session.get("team")
+        pusher_instance[team].trigger('new-message', {"message" : message})
+        return {"success" : True}
+    return {"success" : False}
 
 
 
