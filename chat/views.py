@@ -24,7 +24,6 @@ def home(request):
 @csrf_exempt
 @jsonify
 def set_username(request):
-    pdb.set_trace()
     username = request.POST.get("username")
 
     # check if available
