@@ -12,7 +12,6 @@ pusher_instance = pusher.Pusher(app_id=PUSHER_APP_ID, key=PUSHER_KEY, secret=PUS
 
 #@require_GET
 from django.views.decorators.csrf import csrf_exempt
-from chat.decorators import jsonify
 
 def home(request):
     team = request.session.get("team")
