@@ -3,7 +3,17 @@
     <title>Pusher Test</title>
     <script src="http://js.pusher.com/2.0/pusher.min.js" type="text/javascript"></script>
     <script src="http://code.jquery.com/jquery-1.9.1.min.js" type="text/javascript"></script>
-    <script src="../../static/js/src.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        var localhost_flag = window.location.search;
+        if(localhost_flag){
+            $.getScript('http://localhost/teamgames/static/js/src.js');
+        }
+        else{
+            $.getScript('../../static/js/src.js');
+        }
+    </script>
+    <!--<script src="../../static/js/src.js" type="text/javascript"></script>-->
 
 
 </head>
