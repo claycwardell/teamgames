@@ -16,12 +16,24 @@
     var localhost_flag = window.location.search;
     if(localhost_flag){
         $.getScript('http://localhost/teamgames/static/js/src.js');
-        $.getScript('http://localhost/teamgames/static/css/styles.css');
+        $("head").append("<link>");
+        var css = $("head").children(":last");
+        css.attr({
+            rel:  "stylesheet",
+            type: "text/css",
+            href: "http://localhost/teamgames/static/css/styles.css"
+        });
         $('body').load('http://localhost/teamgames/static/html/page.html');
     }
     else{
         $.getScript('../static/js/src.js');
-        $.getScript('../static/css/styles.css');
+        $("head").append("<link>");
+        var css = $("head").children(":last");
+        css.attr({
+            rel:  "stylesheet",
+            type: "text/css",
+            href: "../static/css/styles.css"
+        });
         $('body').load('../static/html/page.html');
     }
 </script>
