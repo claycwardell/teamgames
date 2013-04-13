@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import hashlib
 from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP
+import json
+import pdb
 
 
-class TeamCalculator(object):
+class MainMiddleware(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
         if not request.session.get('team'):
             request.session['team'] = self._get_team_from_ip(request.META['REMOTE_HOST'])
-        if not request.session.get('username'):
-            return
         return
 
     @staticmethod

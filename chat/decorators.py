@@ -4,14 +4,9 @@ from django.utils import simplejson as json
 import functools
 
 
-
-
-
-
 def jsonify(func):
-    @functools.wraps
+    @functools.wraps(func)
     def wrap(request, *args, **kwargs):
-        pdb.set_trace()
         json_mime = 'application/json'
         if request.method == 'POST':
             request.POST = json.loads(request.body)

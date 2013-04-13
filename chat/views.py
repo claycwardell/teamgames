@@ -1,6 +1,7 @@
 import hashlib
 from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP
 import pdb
+import json
 from django.utils import simplejson
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
@@ -30,7 +31,7 @@ def set_username(request):
     available = True
     if available:
         request.session['username'] = username
-    return {"success" : available}
+    return {'success' : True}
 
 
 
