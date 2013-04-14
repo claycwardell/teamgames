@@ -9,5 +9,5 @@ CUTOFF_TO_TEAM_MAP = {
     THIRD_CUTOFF : 'green'
 }
 
-USERNAME_SESSION_KEY = "username"
-TEAM_SESSION_KEY = "team"
+SESSION_USERNAME_KEY = "username"
+SESSION_TEAM_KEY = "team"

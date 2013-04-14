@@ -1,4 +1,4 @@
-from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP, USERNAME_SESSION_KEY, TEAM_SESSION_KEY
+from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP, SESSION_TEAM_KEY, SESSION_USERNAME_KEY
 from teamgames_site.settings import PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET
 import pdb
 from django.shortcuts import render_to_response
@@ -27,12 +27,15 @@ def home(request):
 @jsonify
 def set_username(request):
     username = request.POST.get("username")
+    team = request.session.get(SESSION_TEAM_KEY)
     print "username: %s" % username
     # check if available once redis is up
-    available = not UsernameManager.get(username)
+    redis_key = _get_username_team_key(username, team)
+    available = not UsernameManager.get(redis_key)
     if available:
         request.session[USERNAME_SESSION_KEY] = username
         UsernameManager.set(username, True)
+
         return {'success' : True}
     return {'success' : False}
 
@@ -42,9 +45,9 @@ def set_username(request):
 def new_message(request):
     message = request.POST.get("message")
     print "message: %s" % message
-    username = request.session.get(USERNAME_SESSION_KEY)
+    username = request.session.get(SESSION_USERNAME_KEY)
     if message is not None:
-        team = request.session.get(TEAM_SESSION_KEY)
+        team = request.session.get(SESSION_USERNAME_KEY)
         pusher_instance[team].trigger('new-message', {"message" : message, "sender" : username, "player" : False})
         return {"success" : True}
     return {"success" : False}
