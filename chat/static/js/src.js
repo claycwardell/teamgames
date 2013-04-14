@@ -58,27 +58,45 @@ function on_submit_username_click(){
         }),
         success: function(response){
             // set username
-            window.username = username;
-            window.current_popup.remove();
-            window.current_popup = undefined;
+            if(response.success){
+                window.username = username;
+                $('#player_name').text(username);
+                window.current_popup.remove();
+                window.current_popup = undefined;
+            }
+            else{
+                errorfunction();
+            }
+
         },
         error: function(one, two, three){
             // username taken, try again
-            var a = 1;
+            errorfunction();
         }
     })
+    function errorfunction(){
+        $('#username-input-caption').text('That username was taken, try another');
+        $('#username-input').val('');
+    }
 }
 
 function start_request_username(){
     // create popup
-    window.current_popup = $('' +
+    var popup = $('' +
         '<div id="popup-wrapper">' +
             '<div id="popup">' +
-                '<p>Please enter a username</p>' +
+                '<p id="username-input-caption">Please enter a username</p>' +
                 '<input id="username-input" type="text">' +
                 '<button id="submit_username">Submit</button> ' +
             '</div> ' +
         '</div>');
+
+    popup.remove_popup = function(){
+        //remove popup from dom
+        //take care of event listeners?
+    }
+
+    window.current_popup = popup;
     $('body').append(current_popup);
 
     //
