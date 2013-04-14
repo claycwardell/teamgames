@@ -8,3 +8,6 @@ CUTOFF_TO_TEAM_MAP = {
     SECOND_CUTOFF : 'blue',
     THIRD_CUTOFF : 'green'
 }
+
+USERNAME_SESSION_KEY = "username"
+TEAM_SESSION_KEY = "team"

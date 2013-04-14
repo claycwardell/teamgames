@@ -1,8 +1,8 @@
-from redis import StrictRedis
-from teamgames_site.settings import REDIS_URL
+import redis
+from teamgames_site.settings import REDIS_HOST, REDIS_PORT, REDIS_DB
 
-
-redis_client = StrictRedis.from_url(REDIS_URL)
+pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+redis_client = redis.Redis(connection_pool=pool)
 
 
 class RedisDbManager(object):
@@ -18,11 +18,18 @@ class RedisDbManager(object):
         return redis_client.get(key)
 
     @classmethod
+    def delete(cls, id):
+        key = cls._get_key(id)
+        return redis_client.delete(key)
+
+    @classmethod
     def set(cls, id, obj):
         key = cls._get_key(id)
         return redis_client.set(key, obj)
 
 
+
+
 class UsernameManager(RedisDbManager):
-#    _prefix = super(UsernameManager, self)._prefix + "username:"
-    pass
+    _prefix = RedisDbManager._prefix + "un:"
+

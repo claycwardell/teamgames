@@ -164,7 +164,9 @@ LOGGING = {
 }
 
 
-REDIS_URL = "http://127.0.0.1:6380"
+REDIS_PORT = 6380
+REDIS_HOST = 'localhost'
+REDIS_DB = 0
 
 
 #PUSHER
