@@ -34,3 +34,22 @@ body{
 #chat-wrapper{
     float:left;
 }
+#chat-box{
+    width: 100%;
+    height: 200px;
+    border: 1px solid rgb(114, 114, 114);
+}
+
+#popup-wrapper{
+    position: absolute;
+    display: block;
+    background-color: rgba(0,0,0,.5);
+    width: 100%;
+    height: 100%;
+}
+#popup{
+    width: 400px;
+    background: rgb(243, 243, 243);
+    height: 250px;
+    margin: auto;
+}
