@@ -1,6 +1,4 @@
-$.ajaxSetup({
-    cache: true
-});
+
 
 function init(){
     $('body').addClass(team);

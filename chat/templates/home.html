@@ -27,6 +27,10 @@
         $('body').load('http://localhost/teamgames/chat/static/html/page.html');
     }
     else{
+        $.ajaxSetup({
+            cache: true
+        });
+        
         $.getScript('../static/js/src.js');
         $("head").append("<link>");
         var css = $("head").children(":last");
