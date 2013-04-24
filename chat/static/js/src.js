@@ -1,3 +1,7 @@
+$.ajaxSetup({
+    cache: true
+});
+
 function init(){
     $('body').addClass(team);
     // Enable pusher logging - don't include this in production
