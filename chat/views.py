@@ -18,7 +18,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
     team = request.session.get("team")
-    ctx = {'team' : team}
+    username = request.session.get("username")
+    ctx = {
+        'team' : team,
+        'username' : username
+    }
     return render_to_response('home.html', ctx)
 
 
@@ -26,6 +30,7 @@ def home(request):
 @csrf_exempt
 @jsonify
 def set_username(request):
+    pdb.set_trace()
     username = request.POST.get("username")
     team = request.session.get(SESSION_TEAM_KEY)
     print "username: %s" % username
