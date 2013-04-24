@@ -27,7 +27,7 @@ function init(){
 };
 
 
-
+init();
 
 
 function get_username(){
