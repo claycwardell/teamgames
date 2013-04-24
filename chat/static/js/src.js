@@ -8,9 +8,8 @@ function init(){
 
     var pusher = new Pusher('ae35d633bac49aecadaf');
     var channel = pusher.subscribe(team);
-    channel.bind(team, function(data) {
-        $('#chat-box').append(data.name+': '+ data.message+ '<br />');
-
+    channel.bind('new-message', function(data) {
+        $('#chat-box').append(data.sender+': '+ data.message+ '<br />');
     });
 
     console.log(username);
@@ -90,7 +89,7 @@ function on_submit_username_click(){
 function set_username(selected_username){
     username = selected_username;
     $('#player_name').text(selected_username);
-    if(typeof(window.current_popup)=="undefined"){
+    if(typeof(window.current_popup)!="undefined"){
         window.current_popup.remove();
         window.current_popup = undefined;
     }
