@@ -27,7 +27,9 @@ function init(){
 };
 
 
-
+if(typeof(localhost_flag)=="undefined"){
+    init();
+}
 
 
 function get_username(){
