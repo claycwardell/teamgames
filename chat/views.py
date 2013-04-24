@@ -47,7 +47,6 @@ def set_username(request):
 @csrf_exempt
 @require_username
 def new_message(request):
-    pdb.set_trace()
     message = request.POST.get("message")
     print "message: %s" % message
     username = request.session.get(SESSION_USERNAME_KEY)
