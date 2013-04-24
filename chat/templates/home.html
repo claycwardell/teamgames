@@ -16,7 +16,8 @@
 <script type="text/javascript">
     var localhost_flag = window.location.search;
     if(localhost_flag){
-        $.getScript('http://localhost/teamgames/chat/static/js/src.js');
+        $.getScript('http://localhost/teamgames/chat/static/js/src.js',
+        init() );
         $("head").append("<link>");
         var css = $("head").children(":last");
         css.attr({
