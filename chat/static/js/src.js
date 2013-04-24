@@ -13,7 +13,14 @@ function init(){
 
     });
 
-    start_request_username()
+    console.log(username);
+    console.log(typeof(username));
+    if(username=="None"){
+        start_request_username()
+    }
+    else{
+        set_username(username)
+    }
 
 };
 
@@ -60,10 +67,7 @@ function on_submit_username_click(){
         success: function(response){
             // set username
             if(response.success){
-                username = selected_username;
-                $('#player_name').text(selected_username);
-                window.current_popup.remove();
-                window.current_popup = undefined;
+                set_username(selected_username)
             }
             else{
                 errorfunction();
@@ -79,6 +83,13 @@ function on_submit_username_click(){
         $('#username-input-caption').text('That username was taken, try another');
         $('#username-input').val('');
     }
+}
+
+function set_username(selected_username){
+    username = selected_username;
+    $('#player_name').text(selected_username);
+    window.current_popup.remove();
+    window.current_popup = undefined;
 }
 
 function start_request_username(){
