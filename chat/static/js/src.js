@@ -8,7 +8,7 @@ function init(){
 
     var pusher = new Pusher('ae35d633bac49aecadaf');
     var channel = pusher.subscribe('herp');
-    channel.bind('derp', function(data) {
+    channel.bind(team, function(data) {
         $('#chat-box').append(data.name+': '+ data.message+ '<br />');
 
     });
@@ -22,7 +22,7 @@ init();
 
 
 function get_username(){
-    return window.username;
+    return username;
 }
 function on_submit_message_click(e){
     // check if we have a username
@@ -50,18 +50,18 @@ function submit_message(){
 
 function on_submit_username_click(){
 
-    var username = $('#username-input').val();
+    var selected_username = $('#username-input').val();
     $.ajax({
         "type":"POST",
         "url":"./set_username/",
         data: JSON.stringify({
-            username:username
+            username:selected_username
         }),
         success: function(response){
             // set username
             if(response.success){
-                window.username = username;
-                $('#player_name').text(username);
+                username = selected_username;
+                $('#player_name').text(selected_username);
                 window.current_popup.remove();
                 window.current_popup = undefined;
             }
