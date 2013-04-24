@@ -7,7 +7,7 @@ function init(){
 
 
     var pusher = new Pusher('ae35d633bac49aecadaf');
-    var channel = pusher.subscribe('herp');
+    var channel = pusher.subscribe(team);
     channel.bind(team, function(data) {
         $('#chat-box').append(data.name+': '+ data.message+ '<br />');
 
@@ -22,9 +22,11 @@ function init(){
         set_username(username)
     }
 
+    rebind_events();
+
 };
 
-init();
+
 
 
 
@@ -88,8 +90,10 @@ function on_submit_username_click(){
 function set_username(selected_username){
     username = selected_username;
     $('#player_name').text(selected_username);
-    window.current_popup.remove();
-    window.current_popup = undefined;
+    if(typeof(window.current_popup)=="undefined"){
+        window.current_popup.remove();
+        window.current_popup = undefined;
+    }
 }
 
 function start_request_username(){
@@ -115,7 +119,13 @@ function start_request_username(){
 }
 
 // event bindings
-$('#submit_message').on('click', on_submit_message_click);
-$('#submit_username').on('click', on_submit_username_click);
+function rebind_events(){
+    $('#submit_message').off('click');
+    $('#submit_username').off('click');
+
+    $('#submit_message').on('click', on_submit_message_click);
+    $('#submit_username').on('click', on_submit_username_click);
+}
+
 
 
