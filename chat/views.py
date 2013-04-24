@@ -47,11 +47,12 @@ def set_username(request):
 @csrf_exempt
 @require_username
 def new_message(request):
+    pdb.set_trace()
     message = request.POST.get("message")
     print "message: %s" % message
     username = request.session.get(SESSION_USERNAME_KEY)
     if message is not None:
-        team = request.session.get(SESSION_USERNAME_KEY)
+        team = request.session.get(SESSION_TEAM_KEY)
         pusher_instance[team].trigger('new-message', {"message" : message, "sender" : username, "player" : False})
         return {"success" : True}
     return {"success" : False}
