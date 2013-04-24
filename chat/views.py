@@ -30,7 +30,6 @@ def home(request):
 @csrf_exempt
 @jsonify
 def set_username(request):
-    pdb.set_trace()
     username = request.POST.get("username")
     team = request.session.get(SESSION_TEAM_KEY)
     print "username: %s" % username
@@ -38,8 +37,8 @@ def set_username(request):
     redis_key = _get_username_team_key(username, team)
     available = not UsernameManager.get(redis_key)
     if available:
-        request.session[USERNAME_SESSION_KEY] = username
-        UsernameManager.set(username, True)
+        request.session[SESSION_USERNAME_KEY] = username
+        UsernameManager.set(username)
 
         return {'success' : True}
     return {'success' : False}
