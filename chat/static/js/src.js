@@ -1,5 +1,5 @@
-
-
+var player = false;
+var active = true;
 function init(){
     $('body').addClass(team);
     // Enable pusher logging - don't include this in production
@@ -10,12 +10,8 @@ function init(){
 
     var pusher = new Pusher('ae35d633bac49aecadaf');
     var channel = pusher.subscribe(team);
-    channel.bind('new-message', function(data) {
-        $('#chat-box').append(data.sender+': '+ data.message+ '<br />');
-    });
+    channel.bind('new-message', on_new_message);
 
-    console.log(username);
-    console.log(typeof(username));
     if(username=="None"){
         start_request_username()
     }
@@ -24,12 +20,44 @@ function init(){
     }
 
     rebind_events();
-
+    start_active_check_timer();
 };
 
 
 init();
 
+function on_new_message(data){
+    var sender;
+    if(data.player){
+        sender = '[P]'+data.sender;
+    }
+    else{
+        sender = data.sender;
+    }
+        $('#chat-box').append(sender+': '+ data.message+ '<br />');
+}
+function start_active_check_timer(){
+    setInterval (do_check, 60000);
+    function do_check(){
+        if(active){
+            ping_is_active();
+        }
+    }
+}
+function ping_is_active(){
+    $.ajax({
+        type: 'GET',
+        url: './ping',
+        success: function(resp){
+            if(resp.success){
+                if(resp.player){
+                    alert('you are now the player');
+                    player = true;
+                }
+            }
+        }
+    })
+}
 
 function get_username(){
     return username;
@@ -54,7 +82,10 @@ function submit_message(){
         data: JSON.stringify({
             username:username,
             message:message
-        })
+        }),
+        success: function(){
+            $('#text-input').val('');
+        }
     });
 }
 
@@ -123,9 +154,17 @@ function start_request_username(){
 function rebind_events(){
     $('#submit_message').off('click');
     $('#submit_username').off('click');
+    $('#text-input').off('keydown');
 
     $('#submit_message').on('click', on_submit_message_click);
+    $('#text-input').on('keydown', message_key_down);
     $('#submit_username').on('click', on_submit_username_click);
+}
+
+function message_key_down(e){
+    if(e.keyCode == 13){
+        on_submit_message_click();
+    }
 }
 
 
