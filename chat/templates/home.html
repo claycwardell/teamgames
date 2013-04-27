@@ -30,10 +30,10 @@
         $.ajaxSetup({
             cache: true
         });
-        
-        var script = $('<script src="../static/js/src.js" type="text/javascript"></script>');
-        $('head'.append(script);
-        $.getScript('../static/js/src.js');
+
+        var get_src = "<script src='../static/js/src.js' type='text/javascript' />"
+        $('head').append(get_src);
+
         $("head").append("<link>");
         var css = $("head").children(":last");
         css.attr({
