@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import hashlib
-from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP
-
+from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP, SESSION_USERNAME_KEY, SESSION_TEAM_KEY
 
 
 class MainMiddleware(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if not request.session.get('team'):
-            request.session['team'] = self._get_team_from_ip(request.META['REMOTE_HOST'])
+        if not request.session.get(SESSION_TEAM_KEY):
+            request.session[SESSION_TEAM_KEY] = self._get_team_from_ip(request.META['REMOTE_HOST'])
+
+
         return
 
     @staticmethod

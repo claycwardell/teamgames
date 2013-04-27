@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.utils import simplejson as json
 import functools
 import chat.views
+from redis_db.managers import UsernameManager
+from teamgames_site.consts import SESSION_USERNAME_KEY
 
 
 def jsonify(func):
@@ -20,7 +22,9 @@ def jsonify(func):
 def require_username(func):
     @functools.wraps(func)
     def wrap(request, *args, **kwargs):
-        if not request.session.get("username"):
+        username = request.session.get(SESSION_USERNAME_KEY)
+        if not username:
             return chat.views.home(request)
+        request.session_user = UsernameManager.get(username)
         return func(request, *args, **kwargs)
     return wrap

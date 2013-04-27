@@ -42,7 +42,9 @@ class RedisDbManager(object):
     @classmethod
     def clear_all(cls):
         keys = cls.keys()
-        return cls._redis_client.delete(*keys)
+        if keys:
+            return cls._redis_client.delete(*keys)
+        return "Db already emtpy"
 
 
 
@@ -50,8 +52,14 @@ class UsernameManager(RedisDbManager):
     _prefix = RedisDbManager._prefix + "un:"
 
     @classmethod
-    def set(cls, username):
-        return super(UsernameManager, cls).set(username, True)
+    def initial_set(cls, username):
+        return super(UsernameManager, cls).set(username, {"player" : False, "last_ping" : None, "username" : username})
+
+    @classmethod
+    def make_player(cls, username):
+        username_dict = cls.get(username)
+        username_dict['player'] = True
+        return cls.set(username, username_dict)
 
 
 
@@ -62,9 +70,21 @@ class TeamManager(RedisDbManager):
     @classmethod
     def add_to_team(cls, username, team):
         # RACE CONDITIONS ALERT
+        first_member = False
         current_team = cls.get(team)
         if current_team is None:
             current_team = set()
+            first_member = True
         current_team.add(username)
+        if first_member:
+            UsernameManager.make_player(username)
         return cls.set(team, current_team)
+
+
+    @classmethod
+    def check_for_player(cls, team):
+        found = False
+        if any([u['player'] for u in cls.get(team)]):
+            found = True
+        return found
 
