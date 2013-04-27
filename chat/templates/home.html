@@ -32,9 +32,11 @@
         $.ajaxSetup({
             cache: true
         });
-        $('body').load('../static/html/page.html');
-        var get_src = "<script src='../static/js/src.js' type='text/javascript' />"
-        $('head').append(get_src);
+        $('body').load('../static/html/page.html', function(){
+            var get_src = "<script src='../static/js/src.js' type='text/javascript' />"
+            $('head').append(get_src);
+        });
+
 
         $("head").append("<link>");
         var css = $("head").children(":last");
@@ -43,10 +45,6 @@
             type: "text/css",
             href: "../static/css/styles.css"
         });
-
-        $(document).ready(function(){
-            init();
-        })
     }
 </script>
 
