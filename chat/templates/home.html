@@ -16,6 +16,8 @@
 <script type="text/javascript">
     var localhost_flag = window.location.search;
     if(localhost_flag){
+
+        $('body').load('http://localhost/teamgames/chat/static/html/page.html');
         $.getScript('http://localhost/teamgames/chat/static/js/src.js');
         $("head").append("<link>");
         var css = $("head").children(":last");
@@ -24,17 +26,15 @@
             type: "text/css",
             href: "http://localhost/teamgames/chat/static/css/styles.css"
         });
-        $('body').load('http://localhost/teamgames/chat/static/html/page.html');
+
     }
     else{
         $.ajaxSetup({
             cache: true
         });
-
+        $('body').load('../static/html/page.html');
         var get_src = "<script src='../static/js/src.js' type='text/javascript' />"
         $('head').append(get_src);
-
-        function init(){};//replace this
 
         $("head").append("<link>");
         var css = $("head").children(":last");
@@ -43,7 +43,7 @@
             type: "text/css",
             href: "../static/css/styles.css"
         });
-        $('body').load('../static/html/page.html');
+
         $(document).ready(function(){
             init();
         })
