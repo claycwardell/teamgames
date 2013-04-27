@@ -7,7 +7,8 @@ urlpatterns = patterns('chat',
     # url(r'^$', 'teamgames_site.views.home', name='home'),
     url(r'^$', 'views.home',),
     url(r'^set_username/$', 'views.set_username',),
-    url(r'^new_message/$', 'views.new_message')
+    url(r'^new_message/$', 'views.new_message'),
+    url(r'^ping/$', 'views.receive_ping')
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

@@ -25,6 +25,12 @@ def require_username(func):
         username = request.session.get(SESSION_USERNAME_KEY)
         if not username:
             return chat.views.home(request)
-        request.session_user = UsernameManager.get(username)
+        user_dict = UsernameManager.get(username)
+        if user_dict is None:
+            UsernameManager.initial_set(username)
+            user_dict = UsernameManager.get_default_user_object(username)
+
+        request.session_user = user_dict
+
         return func(request, *args, **kwargs)
     return wrap

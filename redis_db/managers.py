@@ -1,3 +1,4 @@
+import datetime
 import redis
 from teamgames_site.settings import REDIS_HOST, REDIS_PORT, REDIS_DB
 import cPickle
@@ -53,13 +54,27 @@ class UsernameManager(RedisDbManager):
 
     @classmethod
     def initial_set(cls, username):
-        return super(UsernameManager, cls).set(username, {"player" : False, "last_ping" : None, "username" : username})
+        return super(UsernameManager, cls).set(username, cls.get_default_user_object(username))
 
     @classmethod
     def make_player(cls, username):
         username_dict = cls.get(username)
         username_dict['player'] = True
         return cls.set(username, username_dict)
+
+    @classmethod
+    def get_default_user_object(cls, username):
+        return {'player' : False, 'last_ping' : None, 'username' : username}
+
+#    @classmethod
+#    def update_ping(cls, username):
+#        now = datetime.datetime.now()
+#        player_dict = cls.get(username)
+#        if player_dict is None:
+#            raise ValueError("User doesn't exist")
+#        player_dict['last_ping'] = now
+#        cls.set(username, player_dict)
+
 
 
 

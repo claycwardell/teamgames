@@ -72,6 +72,7 @@ def receive_ping(request):
     user_dict = request.session_user
     user_dict['last_ping'] = now
     UsernameManager.set(user_dict['username'], user_dict)
+    return {"success" : True}
 
 
 
