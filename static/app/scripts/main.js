@@ -35,3 +35,13 @@ require([
 ], function (Backbone) {
     Backbone.history.start();
 });
+
+require([
+    'backbone',
+    'views/app_view'
+],
+function(Backbone, AppView) {
+
+    window._app = new App(AppView);
+    window._app.start();
+});
