@@ -197,7 +197,7 @@ class Board(object):
             raise ValueError("Validate Pawn Move called with non-pawn piece")
         self.check_square_is_available(moving_piece, destination)
 
-
+        #TODO: Finish this
 
         opposing_color = self.get_opposing_color(moving_piece.color)
 

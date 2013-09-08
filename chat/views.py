@@ -11,12 +11,13 @@ from redis_db.managers import UsernameManager, TeamManager
 
 pusher_instance = pusher.Pusher(app_id=PUSHER_APP_ID, key=PUSHER_KEY, secret=PUSHER_SECRET)
 
-LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level='DEBUG')
 
 
 #@require_GET
 from django.views.decorators.csrf import csrf_exempt
 
+@jsonify
 def home(request):
     team = request.session.get("team")
     username = request.session.get("username")
@@ -30,7 +31,7 @@ def home(request):
         'team' : team,
         'username' : username
     }
-    return render_to_response('home.html', ctx)
+    return ctx
 
 
 #@require_POST
@@ -39,9 +40,9 @@ def home(request):
 def set_username(request):
     username = request.POST.get("username")
     team = request.session.get(SESSION_TEAM_KEY)
-    print "username: %s" % username
+    logging.info("username: %s", username)
     # check if available once redis is up
-    redis_key = _get_username_team_key(username, team)
+    redis_key = UsernameManager.get_compound_key(username, team)
     available = not UsernameManager.get(redis_key)
     if available:
         request.session[SESSION_USERNAME_KEY] = username
@@ -55,7 +56,7 @@ def set_username(request):
 @require_username
 def new_message(request):
     message = request.POST.get("message")
-    print "message: %s" % message
+    logging.info("message: %s" % message)
     user_dict = request.session_user
     if message is not None:
         team = request.session.get(SESSION_TEAM_KEY)

@@ -48,6 +48,12 @@ class RedisDbManager(object):
         return "Db already emtpy"
 
 
+    @staticmethod
+    def get_compound_key(key1, key2):
+        return "%s-%s", (key1, key2)
+
+
+
 
 class UsernameManager(RedisDbManager):
     _prefix = RedisDbManager._prefix + "un:"
