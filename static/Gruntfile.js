@@ -12,6 +12,8 @@ var mountFolder = function (connect, dir) {
 // 'test/spec/**/*.js'
 // templateFramework: 'handlebars'
 
+var proxySnippet = require('grunt-connect-proxy/lib/utils').proxyRequest;
+
 module.exports = function (grunt) {
     // show elapsed time at the end
     require('time-grunt')(grunt);
@@ -66,13 +68,25 @@ module.exports = function (grunt) {
                 // change this to '0.0.0.0' to access the server from outside
                 hostname: 'localhost'
             },
+
+            proxies: [
+                {
+                    context: '/api',
+                    host: '10.0.0.2',
+                    port: 8000,
+                    https: false,
+                    changeOrigin: false
+                }
+            ],
+
             livereload: {
                 options: {
                     middleware: function (connect) {
                         return [
                             lrSnippet,
                             mountFolder(connect, '.tmp'),
-                            mountFolder(connect, yeomanConfig.app)
+                            mountFolder(connect, yeomanConfig.app),
+                            proxySnippet,
                         ];
                     }
                 }
@@ -309,6 +323,7 @@ module.exports = function (grunt) {
             'createDefaultTemplate',
             'handlebars',
             'compass:server',
+            'configureProxies',
             'connect:livereload',
             'open',
             'watch'
@@ -348,4 +363,8 @@ module.exports = function (grunt) {
         'test',
         'build'
     ]);
+
+    grunt.loadNpmTasks('grunt-connect-proxy');
+
+
 };

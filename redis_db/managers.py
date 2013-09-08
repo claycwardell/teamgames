@@ -76,9 +76,6 @@ class UsernameManager(RedisDbManager):
 #        cls.set(username, player_dict)
 
 
-
-
-
 class TeamManager(RedisDbManager):
     _prefix = RedisDbManager._prefix + "tm:"
 
