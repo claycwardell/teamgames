@@ -31,17 +31,12 @@ require.config({
 });
 
 require([
-    'backbone'
-], function (Backbone) {
-    Backbone.history.start();
-});
-
-require([
     'backbone',
     'views/app_view'
 ],
 function(Backbone, AppView) {
+    Backbone.history.start();
 
-    window._app = new App(AppView);
-    window._app.start();
+
+    window.AppView = new AppView({el:$('#app')});
 });
