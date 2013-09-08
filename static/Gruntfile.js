@@ -86,7 +86,7 @@ module.exports = function (grunt) {
                             lrSnippet,
                             mountFolder(connect, '.tmp'),
                             mountFolder(connect, yeomanConfig.app),
-                            proxySnippet,
+                            proxySnippet
                         ];
                     }
                 }
