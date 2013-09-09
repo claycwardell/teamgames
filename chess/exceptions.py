@@ -4,3 +4,7 @@ class IllegalMoveException(Exception):
 
 class InsaneBoardStateException(Exception):
     pass
+
+
+class MoveNotMadeException(Exception):
+    pass
