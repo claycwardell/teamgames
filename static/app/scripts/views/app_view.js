@@ -16,7 +16,7 @@ define([
         	'click #submit_username': 	'on_submit_username_click'
         },
         username:'None',
-        active: True,
+        active: true,
         initialize: function(options){
         	_.bindAll(this, 'render', 'append_message', 'on_submit_message_click', 
         		'on_submit_username_click', 'submit_message',
@@ -98,7 +98,8 @@ define([
 		    }
 
 		    window.current_popup = popup;
-		    $('body').append(current_popup);
+		    this.$el.append(current_popup);
+
 
 		    //
 		},
@@ -106,7 +107,7 @@ define([
 		    var selected_username = $('#username-input').val();
 		    $.ajax({
 		        "type":"POST",
-		        "url":"./set_username/",
+		        "url":"./api/set_username/",
 		        data: JSON.stringify({
 		            username:selected_username
 		        }),
@@ -138,7 +139,7 @@ define([
 		            ping_is_active();
 		        }
 		    }
-		}
+		},
 		ping_is_active: function(){
 			var that = this;
 		    $.ajax({
