@@ -32,11 +32,12 @@ require.config({
 
 require([
     'backbone',
-    'views/app_view'
+    'views/app_view',
+    'models/chat'
 ],
-function(Backbone, AppView) {
+function(Backbone, AppView, chat_model) {
     Backbone.history.start();
 
-
-    window.AppView = new AppView({el:$('#app')});
+    var Chat_Model = new chat_model();
+    window.AppView = new AppView({el:$('#app'), chat_model: Chat_Model});
 });
