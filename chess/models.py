@@ -1,9 +1,9 @@
 import pdb
 from chess import consts, utils
-from chess.exceptions import IllegalMoveException, InsaneBoardStateException
+from chess.exceptions import IllegalMoveException, InsaneBoardStateException, MoveNotMadeException
 import logging
 
-logging.basicConfig(level='DEBUG')
+logging.basicConfig(level='INFO')
 
 
 class Board(object):
@@ -82,21 +82,16 @@ class Board(object):
 
 #######################################################################################################################
 #TODO: Sort through this mess
-    def make_move(self, origin, destination):
-        piece = self.get_piece(origin)
-        if piece is None:
-            raise ValueError("No piece at origin")
-        if destination not in piece.get_possible_moves():
-            raise ValueError("Illegal move for that piece")
+#    def make_move(self, origin, destination):
+#        piece = self.get_piece(origin)
+#        if piece is None:
+#            raise ValueError("No piece at origin")
+#        if destination not in piece.get_possible_moves():
+#            raise ValueError("Illegal move for that piece")
 
-    def make_move(self, moving_piece, destination):
-        moving_piece.rollback_position = moving_piece.position
-        potential_captured_piece = self.set_piece(moving_piece, destination)
-        try:
-            self.validate_did_not_move_into_check(moving_piece.color)
-        except IllegalMoveException:
-            self.set_piece(moving_piece, moving_piece.rollback_position)
-            self.set_piece(potential_captured_piece, potential_captured_piece.position)
+#    def make_move(self, moving_piece, destination):
+#        moving_piece.position = destination
+
 
 #######################################################################################################################
 
@@ -129,8 +124,14 @@ class Board(object):
                 raise ValueError("cannot move to current position")
 
 
-    def _validate_move(self, moving_piece, destination, king_capture=False):
-        destination = utils.get_coord_tuple(destination)
+    def _validate_move(self, moving_piece, destination):
+        """
+        Validation method for Rooks, Bishops, Kings, and Queens, since all of them require a clear path to their
+        destination in order to move legally.
+        """
+        if moving_piece.__class__ not in [Rook, Bishop, Queen, King]:
+            raise ValueError("Called validate move with an invalid piece type: %s" % moving_piece.__class__)
+
         if destination not in moving_piece.get_base_possible_moves():
             return False
         direction = self.determine_move_direction(moving_piece, destination)
@@ -178,65 +179,90 @@ class Board(object):
 
         self.check_square_is_available(moving_piece, (current_x, current_y), allow_capture=True)
 
-        opposing_color = self.get_opposing_color(moving_piece.color)
-        self.validate_did_not_move_into_check(opposing_color, king_capture)
 
-
-
-    def _validate_jump(self, moving_piece, destination, king_capture=False):
+    def _validate_jump(self, moving_piece, destination):
+        """
+        Validation method for Knights.  No clear path to destination required.
+        """
         if moving_piece.__class__ != Knight:
             raise ValueError("Can only jump with knights")
         self.check_square_is_available(moving_piece, destination)
 
-        opposing_color = self.get_opposing_color(moving_piece.color)
-        self.validate_did_not_move_into_check(opposing_color, king_capture)
 
 
-    def _validate_pawn_move(self, moving_piece, destination, king_capture=False):
+    def _validate_pawn_move(self, moving_piece, destination):
+        """
+        Validation method for pawns.  Separate because pawns are crazy.
+        """
         if moving_piece.__class__ != Pawn:
             raise ValueError("Validate Pawn Move called with non-pawn piece")
         self.check_square_is_available(moving_piece, destination)
+        direction = self.determine_move_direction(moving_piece, destination)
+        if direction in ['s', 'n']:
+            # If it is a north south move, it must be to an unoccupied square.
+            if self.get_piece(destination) is not None:
+                raise IllegalMoveException
+        else:
+            # If it's not a north-south move, there must be a capture involved.
+            self.verify_pawn_capture_target(moving_piece, destination)
 
 
 
-        opposing_color = self.get_opposing_color(moving_piece.color)
+    def verify_pawn_capture_target(self, moving_piece, destination):
+        """
+        Verifies that the pawn is in fact capturing an opponents piece.  This is also where the en passant
+        check happens.
+        """
+        piece_to_capture = self.get_piece(destination)
+        if piece_to_capture is None:
+            # Check for en passant
+            possible_en_passant_position = (destination[0], moving_piece.opposing_vertical_move(destination[1]))
+            possible_en_passant_pawn = self.get_piece(possible_en_passant_position)
+            if type(possible_en_passant_pawn) != Pawn or not possible_en_passant_pawn._vulnerable_to_en_passant:
+                raise IllegalMoveException
 
 
-
-    def validate_did_not_move_into_check(self, color_to_play, king_capture=False):
+    def validate_did_not_move_into_check(self, moving_piece, destination):
         """
         Checks that the moving player did not move into check.  Returns None if he did not, otherwise
         raises IllegalMoveException
         """
-        if not king_capture:
-            opposing_color = self.get_opposing_color(color_to_play)
-            opposing_king = self.get_king(opposing_color)
-            for square in self.piece_map:
-                possible_piece = self.get_piece(square)
-                logging.info("Validating piece: %s", possible_piece)
-                if possible_piece is not None and possible_piece.color == color_to_play:
-                    if self.validate_play(possible_piece, opposing_king.position):
-                        raise IllegalMoveException
+
+        # I'm not sure I like the idea of temporarily moving the piece to see if its in check, then moving it back.
+        # Seems like its pretty ham-handed
+        illegal = False
+        rollback_position = moving_piece.position
+        moving_piece.position = destination
+        if self.side_is_in_check(moving_piece.color):
+            illegal = True
+
+        moving_piece.position = rollback_position
+        if illegal:
+            raise IllegalMoveException
 
 
-    def validate_play(self, playing_piece, destination):
+
+    def side_is_in_check(self, color):
         """
-        Allows piece agnostic play validation.  Routes knights to _validate_jump and other pieces to _validate_move
+        Returns True if 'color' is in check, False otherwise.
         """
-        king_capture = False
-        possible_piece = self.get_piece(destination)
-        if possible_piece is not None and possible_piece.__class__ == King:
-            king_capture = True
+        king = self.get_king(color)
+        opposing_color = self.get_opposing_color(color)
+        for square in self.piece_map:
+            possible_piece = self.get_piece(square)
+            logging.info("Validating piece: %s", possible_piece)
+            if possible_piece is not None and possible_piece.color == opposing_color:
+                if self.validate_play(possible_piece, king.position):
+                    return True
+        return False
 
-        if playing_piece.__class__ == Knight:
-            return self._validate_jump(playing_piece, destination, king_capture)
-        else:
-            return self._validate_move(playing_piece, destination, king_capture)
 
 
     def check_square_is_available(self, moving_piece, square_coords, allow_capture=False):
         """
-        Checks that the passed in square does not contain a piece of the same color as the moving piece.
+        Checks that the passed in square does not contain a piece of the same color as the moving piece.  If
+        allow_capture is set to false, it also returns false if the square contains a piece of the opposing color.
+        This is for pathfinding -- verifying that a moving piece can get to its destination.
         """
         possible_piece = self.get_piece(square_coords)
         if possible_piece is None:
@@ -273,12 +299,75 @@ class Board(object):
             return consts.BLACK_COLOR
 
 
+    def _validate_play(self, playing_piece, destination):
+        """
+        Allows piece agnostic play validation.  Routes knights to _validate_jump and other pieces to _validate_move
+        """
+        destination = utils.get_coord_tuple(destination)
+        if destination not in playing_piece.get_base_possible_moves():
+            raise IllegalMoveException
+
+        king_capture = False
+        possible_piece = self.get_piece(destination)
+        if possible_piece is not None and possible_piece.__class__ == King:
+            king_capture = True
+
+        if playing_piece.__class__ == Knight:
+            self._validate_jump(playing_piece, destination)
+        elif playing_piece.__class__ == Pawn:
+            self._validate_pawn_move(playing_piece, destination)
+        else:
+            self._validate_move(playing_piece, destination)
+
+        if not king_capture:
+            self.validate_did_not_move_into_check(playing_piece, destination)
+
+
+    def validate_play(self, playing_piece, destination):
+        """
+        External method to validate a play.  Just as pass through to the internal method with error handling.
+        This way we can return True / False instead of having the caller have to worry about exception handling.
+        """
+        try:
+            self._validate_play(playing_piece, destination)
+            return True
+        except IllegalMoveException:
+            return False
+
+
+
+    def make_move(self, playing_piece, destination):
+        """
+        Method used to actually make a move once the move has been validated.  Does no validation.
+        """
+        destination = utils.get_coord_tuple(destination)
+        if self.validate_play(playing_piece, destination):
+            possible_piece = self.get_piece(destination)
+            if possible_piece is not None:
+                possible_piece.captured = True
+            self.piece_map[playing_piece.position] = None
+            playing_piece.make_move(destination)
+            self.piece_map[destination] = playing_piece
+
+        else:
+            raise MoveNotMadeException
+
+
+    def post_move_routine(self, color_that_just_moved):
+        """
+        Checks for checkmate, checks for check, and flips vulnerable_to_en_passant flags on opposing pawns,
+        since you only get one move to en_passant
+        """
+        opposing_color = self.get_opposing_color(color_that_just_moved)
+        #TODO: Finish this
+
 
 
 class Piece(object):
     def __init__(self, position, color):
         self._position = position
         self._color = color
+        self._captured = False
 
     @property
     def display_str(self):
@@ -304,6 +393,18 @@ class Piece(object):
     def color(self, color):
         self._color = color
 
+
+    @property
+    def captured(self):
+        return self._captured
+
+    @captured.setter
+    def captured(self, captured):
+        if captured:
+            self.position = None
+        self._captured = captured
+
+
     def __repr__(self):
         display_str = self.display_str
         position = self.position
@@ -313,15 +414,19 @@ class Piece(object):
         return ret_str
 
 
-
-class MovingPiece(Piece):
-#    __move_method__ = Board.move
-    pass
+    def make_move(self, destination):
+        self.position = destination
 
 
-class JumpingPiece(Piece):
-#    __move_method__ = Board.jump
-    pass
+
+class FirstMoveTrackedPiece(Piece):
+    def __init__(self, position, color):
+        super(FirstMoveTrackedPiece, self).__init__(position, color)
+        self._has_moved = False
+
+    def make_move(self, destination):
+        super(FirstMoveTrackedPiece, self).make_move(destination)
+        self._has_moved = True
 
 
 class DiagonalMovingMixin(object):
@@ -331,13 +436,13 @@ class DiagonalMovingMixin(object):
         y_funcs = x_funcs = [utils.increment, utils.decrement]
 
         for y_func in y_funcs:
-            print "first loop"
+            logging.debug("first loop")
             for x_func in x_funcs:
                 x, y = self._position
-                print "second loop"
+                logging.debug("second loop")
                 while (1 <= x <= 8 and 1 <= y <= 8):
                     possible_move_set.add((x, y))
-                    print "adding %s, %s" % (x, y)
+                    logging.debug("adding %s, %s" % (x, y))
                     x = x_func(x)
                     y = y_func(y)
 
@@ -354,19 +459,29 @@ class PerpendicularMovingMixin(object):
             x, y = self._position
             while (1 <= x <= 8):
                 possible_move_set.add((x, y))
-                print "adding %s, %s" % (x, y)
+                logging.debug("adding %s, %s" % (x, y))
                 x = func(x)
             x, y = self._position
             while (1 <= y <= 8):
                 possible_move_set.add((x, y))
-                print "adding %s, %s" % (x, y)
+                logging.debug("adding %s, %s" % (x, y))
                 y = func(y)
 
         possible_move_set.remove(self._position)
         return possible_move_set
 
 
-class Bishop(MovingPiece, DiagonalMovingMixin):
+class Rook(FirstMoveTrackedPiece, PerpendicularMovingMixin):
+    def __init__(self, position, color):
+        super(Rook, self).__init__(position, color)
+        self._letter = "R"
+
+    def get_base_possible_moves(self):
+        return self.get_perpendicular_moves()
+
+
+
+class Bishop(Piece, DiagonalMovingMixin):
     def __init__(self, position, color):
         super(Bishop, self).__init__(position, color)
         self._letter = "B"
@@ -375,18 +490,7 @@ class Bishop(MovingPiece, DiagonalMovingMixin):
         return self.get_diagonal_moves()
 
 
-class Rook(MovingPiece, PerpendicularMovingMixin):
-    def __init__(self, position, color):
-        super(Rook, self).__init__(position, color)
-        self._letter = "R"
-
-
-    def get_base_possible_moves(self):
-        return self.get_perpendicular_moves()
-
-
-
-class Knight(JumpingPiece):
+class Knight(Piece):
     def __init__(self, position, color):
         super(Knight, self).__init__(position, color)
         self._letter = "N"
@@ -425,7 +529,7 @@ class Knight(JumpingPiece):
                     x, y = big_func(x, y)
                     x, y = little_func(x, y)
                     if 1 <= x <= 8 and 1 <= y <= 8:
-                        print "adding %s, %s" % (x, y)
+                        logging.debug("adding %s, %s" % (x, y))
                         possible_move_set.add((x, y))
 
             elif big_func == big_move3 or big_func == big_move4:
@@ -434,24 +538,23 @@ class Knight(JumpingPiece):
                     x, y = big_func(x, y)
                     x, y = little_func(x, y)
                     if 1 <= x <= 8 and 1 <= y <= 8:
-                        print "adding %s, %s" % (x, y)
+                        logging.debug("adding %s, %s" % (x, y))
                         possible_move_set.add((x, y))
 
         return possible_move_set
 
 
-
-
-class Queen(MovingPiece, PerpendicularMovingMixin, DiagonalMovingMixin):
+class Queen(Piece, PerpendicularMovingMixin, DiagonalMovingMixin):
     def __init__(self, position, color):
         super(Queen, self).__init__(position, color)
         self._letter = "Q"
 
-
     def get_base_possible_moves(self):
         return self.get_diagonal_moves() | self.get_perpendicular_moves()
 
-class King(MovingPiece, PerpendicularMovingMixin, DiagonalMovingMixin):
+
+
+class King(FirstMoveTrackedPiece, PerpendicularMovingMixin, DiagonalMovingMixin):
     def __init__(self, position, color):
             super(King, self).__init__(position, color)
             self._letter = "K"
@@ -469,30 +572,31 @@ class King(MovingPiece, PerpendicularMovingMixin, DiagonalMovingMixin):
         return possible_move_set
 
 
-class Pawn(Piece):
+class Pawn(FirstMoveTrackedPiece):
     def __init__(self, position, color):
         super(Pawn, self).__init__(position, color)
         self._letter = "p"
-        self._has_moved = False
-        self._may_en_passant = False
-        self._vulnerable_to_en_passant = False
+        self.vulnerable_to_en_passant = False
+        if self.color == consts.WHITE_COLOR:
+            self.vertical_move = utils.increment
+            self.opposing_vertical_move = utils.decrement
+        else:
+            self.vertical_move = utils.decrement
+            self.opposing_vertical_move = utils.increment
 
 
     def get_base_possible_moves(self):
 #        pdb.set_trace()
         possible_move_set = set()
-        if self.color == consts.WHITE_COLOR:
-            y_move_func = utils.increment
-        else:
-            y_move_func = utils.decrement
         x, y = self._position
         if not self._has_moved:
+            # Two forward on first play
             possible_move_set.add((x,
-                                   y_move_func( y_move_func(y)) )
+                                   self.vertical_move( self.vertical_move(y) ) )
             )
-        possible_move_set.add((x, y_move_func(y)))
-        possible_move_set.add((x-1, y_move_func(y)))
-        possible_move_set.add((x+1, y_move_func(y)))
+        possible_move_set.add((x, self.vertical_move(y)))
+        possible_move_set.add((x-1, self.vertical_move(y)))
+        possible_move_set.add((x+1, self.vertical_move(y)))
         return possible_move_set
 
 
