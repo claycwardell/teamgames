@@ -15,8 +15,6 @@ define([
         	'keydown #text_input': 		'message_key_down',
         	'click #submit_username': 	'on_submit_username_click'
         },
-        username:'None',
-        active: true,
         initialize: function(options){
         	_.bindAll(this, 'render', 'append_message', 'on_submit_message_click', 
         		'on_submit_username_click', 'submit_message',
@@ -66,20 +64,16 @@ define([
 		    var that = this
 		    var message = this.$('#text-input').val();
 		    var username = get_username();
-		    $.ajax({
-		        "type":"POST",
-		        "url":"./api/new_message/",
-		        data: JSON.stringify({
-		            username:username,
-		            message:message
-		        }),
-		        success: function(){
-		            this.$('#text-input').val('');
-		        }
-		    });
+
+		    this.model.submit_message(
+		    	message, 
+		    	username, 
+		    	function(){that.$('#text-input').val('');}
+		    );
+		    
 		},
 		get_username: function(){
-		    return this.username;
+		    return this.model.get('username');
 		},
 		start_request_username: function(){
 		    // create popup
@@ -99,62 +93,17 @@ define([
 
 		    window.current_popup = popup;
 		    this.$el.append(current_popup);
-
-
-		    //
 		},
 		on_submit_username_click: function(){
 		    var selected_username = $('#username-input').val();
-		    $.ajax({
-		        "type":"POST",
-		        "url":"./api/set_username/",
-		        data: JSON.stringify({
-		            username:selected_username
-		        }),
-		        success: function(response){
-		            // set username
-		            if(response.success){
-		                set_username(selected_username)
-		            }
-		            else{
-		                errorfunction();
-		            }
-
-		        },
-		        error: function(one, two, three){
-		            // username taken, try again
-		            errorfunction();
-		        }
-		    })
+		    this.model.submit_username(selected_username, error_function);
+		    
 		    function errorfunction(){
 		        $('#username-input-caption').text('That username was taken, try another');
 		        $('#username-input').val('');
 		    }
-		},
-		start_active_check_timer: function(){
-			var that = this;
-		    setInterval (do_check, 60000);
-		    function do_check(){
-		        if(that.active){
-		            ping_is_active();
-		        }
-		    }
-		},
-		ping_is_active: function(){
-			var that = this;
-		    $.ajax({
-		        type: 'GET',
-		        url: './ping',
-		        success: function(resp){
-		            if(resp.success){
-		                if(resp.player){
-		                    alert('you are now the player');
-		                    that.player = true;
-		                }
-		            }
-		        }
-		    })
 		}
+		
     });
 
     return AppViewView;

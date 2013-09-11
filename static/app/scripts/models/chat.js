@@ -8,6 +8,8 @@ define([
 
     var ChatModel = Backbone.Model.extend({
         defaults: {
+        	username: 'None',
+        	active: true
         },
         url: function(){
 			return 'http://localhost:9000/api/chat/'
@@ -40,6 +42,65 @@ define([
 		    }
 		    var message_text = (sender+': '+ data.message+ '<br />');
 	        this.trigger('new_message', message_text);
+		},
+		submit_message: function(message, username, success_function){
+			$.ajax({
+		        "type":"POST",
+		        "url":"./api/new_message/",
+		        data: JSON.stringify({
+		            username:username,
+		            message:message
+		        }),
+		        success: function(){
+		            success_function();
+		        }
+		    });
+		},
+		submit_username: function( selected_username, error_function){
+			$.ajax({
+		        "type":"POST",
+		        "url":"./api/set_username/",
+		        data: JSON.stringify({
+		            username:selected_username
+		        }),
+		        success: function(response){
+		            if(response.success){
+		                set_username(selected_username)
+		            }
+		            else{
+		                error_function();
+		            }
+
+		        },
+		        error: function(one, two, three){
+		            // username taken, try again
+		            error_function();
+		        }
+		    })
+		},
+		start_active_check_timer: function(){
+			var that = this;
+		    setInterval (do_check, 60000);
+		    function do_check(){
+		        if(that.get('active'){
+		            ping_is_active();
+		        }
+		    }
+		},
+		ping_is_active: function(){
+			var that = this;
+		    $.ajax({
+		        type: 'GET',
+		        url: './ping',
+		        success: function(resp){
+		            if(resp.success){
+		                if(resp.player){
+		                    alert('you are now the player');
+		                    that.set('player', true);
+		                }
+		            }
+		        }
+		    })
 		}
 
     });
