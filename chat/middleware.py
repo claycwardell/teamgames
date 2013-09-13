@@ -8,7 +8,6 @@ class MainMiddleware(object):
         if not request.session.get(SESSION_TEAM_KEY):
             request.session[SESSION_TEAM_KEY] = self._get_team_from_ip(request.META['REMOTE_HOST'])
 
-
         return
 
     @staticmethod
