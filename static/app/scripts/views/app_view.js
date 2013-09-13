@@ -18,25 +18,27 @@ define([
         initialize: function(options){
         	_.bindAll(this, 'render', 'append_message', 'on_submit_message_click', 
         		'on_submit_username_click', 'submit_message',
-        		'get_username', 'start_request_username', 'start_active_check_timer', 'ping_is_active');
+        		'get_username', 'start_request_username');
         	this.model = options.chat_model;
 
         	this.render();
 
 
         	this.model.bind('change', this.render);
+        	// get username
         	this.model.fetch();
 
         	this.model.bind('new_message', this.append_message);
 
-        	if(this.username=="None"){
-		        this.start_request_username()
-		    }
-		    else{
-		        this.set_username(username)
-		    }
+        	// init setup for username once model has synced
+        	this.model.once('change', function(){
+        		if(this.model.get('username')=="None"){
+			        this.start_request_username();
+			    }
+        	});
+        	
 
-		    this.start_active_check_timer();
+		    this.model.start_active_check_timer();
         },
         render: function(){
         	this.$el.html(this.template(this.model.toJSON()));

@@ -12,13 +12,15 @@ define([
         	active: true
         },
         url: function(){
-			return 'http://localhost:9000/api/chat/'
+			return './api/chat/'
 		},
 		initialize: function(){
 			_.bindAll(this, 'log_change', 'save_team', 'start_pusher_chat', 'on_new_message');
 
 			this.on('change', this.log_change);
 			this.on('change:team', this.save_team);
+
+			this.start_active_check_timer();
 		},
 		log_change: function(){
 			console.log(this.toJSON());
@@ -65,7 +67,7 @@ define([
 		        }),
 		        success: function(response){
 		            if(response.success){
-		                set_username(selected_username)
+		                this.set('username', selected_username)
 		            }
 		            else{
 		                error_function();
@@ -82,8 +84,8 @@ define([
 			var that = this;
 		    setInterval (do_check, 60000);
 		    function do_check(){
-		        if(that.get('active'){
-		            ping_is_active();
+		        if(that.get('active')){
+		            that.ping_is_active();
 		        }
 		    }
 		},
@@ -91,11 +93,13 @@ define([
 			var that = this;
 		    $.ajax({
 		        type: 'GET',
-		        url: './ping',
+		        url: './api/ping',
 		        success: function(resp){
 		            if(resp.success){
 		                if(resp.player){
-		                    alert('you are now the player');
+		                	if(that.get('player')==false){
+		                		alert('you are now the player');
+		                	}
 		                    that.set('player', true);
 		                }
 		            }
