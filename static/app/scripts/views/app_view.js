@@ -16,9 +16,8 @@ define([
         	'click #submit_username': 	'on_submit_username_click'
         },
         initialize: function(options){
-        	_.bindAll(this, 'render', 'append_message', 'on_submit_message_click', 
-        		'on_submit_username_click', 'submit_message',
-        		'get_username', 'start_request_username');
+        	_.bindAll(this, 'render', 'append_message', 'on_submit_message_click',  
+        		'start_request_username');
         	this.model = options.chat_model;
 
         	this.render();
@@ -56,18 +55,18 @@ define([
         },
         on_submit_message_click: function(e){
         	// check if we have a username
-		    if( !get_username() ){
-		        start_request_username();
+		    if( !this.model.get('username') ){
+		        this.start_request_username();
 		    }
 		    // submit via post request
 		    else{
-		        submit_message();
+		        this.submit_message();
 		    }
         },
         submit_message: function(){
 		    var that = this
 		    var message = this.$('#text-input').val();
-		    var username = get_username();
+		    var username = this.model.get('username');
 
 		    this.model.submit_message(
 		    	message, 
@@ -75,9 +74,6 @@ define([
 		    	function(){that.$('#text-input').val('');}
 		    );
 		    
-		},
-		get_username: function(){
-		    return this.model.get('username');
 		},
 		start_request_username: function(){
 		    // create popup
@@ -102,7 +98,8 @@ define([
 		    var selected_username = $('#username-input').val();
 		    this.model.submit_username(selected_username, error_function);
 		    
-		    function errorfunction(){
+
+		    function error_function(){
 		        $('#username-input-caption').text('That username was taken, try another');
 		        $('#username-input').val('');
 		    }

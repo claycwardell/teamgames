@@ -9,7 +9,7 @@ define([
     var ChatModel = Backbone.Model.extend({
         defaults: {
         	username: 'None',
-        	team: window.localStorage.getItem('team'),
+        	team: null,
         	active: true
         },
         url: function(){
@@ -27,12 +27,11 @@ define([
 			console.log(this.toJSON());
 		},
 		save_team: function(){
-			window.localStorage.setItem('team',this.get('team'));
 			this.start_pusher_chat();
 		},
 		start_pusher_chat: function(){
 			var pusher = new Pusher('ae35d633bac49aecadaf');
-		    var channel = pusher.subscribe(team);
+		    var channel = pusher.subscribe(this.get('team'));
 		    channel.bind('new-message', this.on_new_message);
 		},
 		on_new_message: function(data){
@@ -49,7 +48,7 @@ define([
 		submit_message: function(message, username, success_function){
 			$.ajax({
 		        "type":"POST",
-		        "url":"./api/new_message/",
+		        "url":"./api/chat/new_message/",
 		        data: JSON.stringify({
 		            username:username,
 		            message:message
@@ -60,15 +59,16 @@ define([
 		    });
 		},
 		submit_username: function( selected_username, error_function){
+			var that = this;
 			$.ajax({
 		        "type":"POST",
-		        "url":"./api/set_username/",
+		        "url":"./api/chat/set_username/",
 		        data: JSON.stringify({
 		            username:selected_username
 		        }),
 		        success: function(response){
 		            if(response.success){
-		                this.set('username', selected_username)
+		                that.set('username', selected_username)
 		            }
 		            else{
 		                error_function();
@@ -94,7 +94,7 @@ define([
 			var that = this;
 		    $.ajax({
 		        type: 'GET',
-		        url: './api/ping',
+		        url: './api/chat/ping',
 		        success: function(resp){
 		            if(resp.success){
 		                if(resp.player){
