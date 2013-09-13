@@ -9,6 +9,7 @@ define([
     var ChatModel = Backbone.Model.extend({
         defaults: {
         	username: 'None',
+        	team: window.localStorage.getItem('team'),
         	active: true
         },
         url: function(){
@@ -26,7 +27,7 @@ define([
 			console.log(this.toJSON());
 		},
 		save_team: function(){
-			window.localhost.save({'team':this.get('team')});
+			window.localStorage.setItem('team',this.get('team'));
 			this.start_pusher_chat();
 		},
 		start_pusher_chat: function(){
