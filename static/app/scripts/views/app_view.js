@@ -30,15 +30,17 @@ define([
 
         	this.model.bind('new_message', this.append_message);
 
+
         	// init setup for username once model has synced
         	this.model.once('change', function(){
         		if(this.model.get('username')=="None"){
 			        this.start_request_username();
 			    }
-        	});
+        	}, 
+        	this);
         	
 
-		    this.model.start_active_check_timer();
+		    
         },
         render: function(){
         	this.$el.html(this.template(this.model.toJSON()));
