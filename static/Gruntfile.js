@@ -41,7 +41,7 @@ module.exports = function (grunt) {
                 tasks: ['coffee:test']
             },
             compass: {
-                files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
+                files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass,css}'],
                 tasks: ['compass']
             },
             livereload: {
@@ -264,7 +264,9 @@ module.exports = function (grunt) {
                     src: [
                         '*.{ico,txt}',
                         '.htaccess',
-                        'images/{,*/}*.{webp,gif}'
+                        'images/{,*/}*.{webp,gif}',
+                        '.app\bower_components\bootstrap\dist\css\bootstrap.min'
+
                     ]
                 }]
             }
