@@ -91,12 +91,11 @@ define([
 			var $message_content = $message_text.find('.msg-content')
 
 			// find @username
-				// anyone's username
-			var username_re = /@[A-Za-z0-9]+/g
+			if(this.get("username")=="None"){	
+				return;
 				// your username
-			if(this.get("username")!="None"){
-				username_re = new RegExp("/@"+this.get("username")+"/")
 			}
+			var username_re = new RegExp("@"+this.get("username"));	
 			var username_search = $message_content.text().match(username_re);
 			if(username_search!=null){
 				if(username_search.length){
