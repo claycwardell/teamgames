@@ -1,4 +1,6 @@
 import datetime
+from datetime import timedelta
+import pdb
 import redis
 from teamgames_site.settings import REDIS_HOST, REDIS_PORT, REDIS_DB
 import cPickle
@@ -53,8 +55,6 @@ class RedisDbManager(object):
         return "%s-%s", (key1, key2)
 
 
-
-
 class UsernameManager(RedisDbManager):
     _prefix = RedisDbManager._prefix + "un:"
 
@@ -63,14 +63,9 @@ class UsernameManager(RedisDbManager):
         return super(UsernameManager, cls).set(username, cls.get_default_user_object(username))
 
     @classmethod
-    def make_player(cls, username):
-        username_dict = cls.get(username)
-        username_dict['player'] = True
-        return cls.set(username, username_dict)
-
-    @classmethod
     def get_default_user_object(cls, username):
-        return {'player' : False, 'last_ping' : None, 'username' : username}
+        return {'last_ping' : None, 'username' : username, 'team' : None}
+
 
 #    @classmethod
 #    def update_ping(cls, username):
@@ -94,15 +89,77 @@ class TeamManager(RedisDbManager):
             current_team = set()
             first_member = True
         current_team.add(username)
+        user_dict = UsernameManager.get(username)
+        user_dict['team'] = team
+        UsernameManager.set(username, user_dict)
         if first_member:
-            UsernameManager.make_player(username)
+            PlayerManager.make_player(username)
         return cls.set(team, current_team)
 
 
+class PlayerManager(RedisDbManager):
+    _prefix = RedisDbManager._prefix + "pl"
+    _teams = ['green', 'red', 'blue']
+    _inactive_period = timedelta(seconds=90)
+
     @classmethod
-    def check_for_player(cls, team):
-        found = False
-        if any([u['player'] for u in cls.get(team)]):
-            found = True
-        return found
+    def set(cls, team, username):
+        cls.unassign_player(team)
+        user_dict = UsernameManager.get(username)
+        PlayerManager.set(user_dict['username'], user_dict)
+        return super(PlayerManager, cls).set(team, username)
+
+    @classmethod
+    def get(cls, team):
+        username = super(PlayerManager, cls).get(team)
+        user = UsernameManager.get(username)
+        return user
+
+    @classmethod
+    def get_all_players(cls):
+        result_dict = {}
+        for team in cls._teams:
+            result_dict[team] = cls.get(team)
+        return result_dict
+
+    @classmethod
+    def check_for_inactive_players(cls):
+        pdb.set_trace()
+        now = datetime.datetime.now()
+        player_map = cls.get_all_players()
+        for team in player_map:
+            player = player_map[team]
+            if player is None or (now - player['last_ping']) > cls._inactive_period:
+                    cls.reassign_player_for_team(team)
+
+
+    @classmethod
+    def reassign_player_for_team(cls, team):
+        usernames = TeamManager.get(team)
+        if usernames is not None:
+            for u in usernames:
+                user = UsernameManager.get(u)
+                if cls.get_inactive_period(user) < cls._inactive_period:
+                    cls.make_player(user['username'])
+
+    @classmethod
+    def make_player(cls, username):
+        username_dict = UsernameManager.get(username)
+        cls.set(username_dict['team'], username_dict['username'])
+        PlayerManager.set(username, username_dict)
+
+    @classmethod
+    def unassign_player(cls, team):
+        player = cls.get(team)
+        if player is not None:
+            UsernameManager.set(player['username'], player)
+
+    @staticmethod
+    def get_inactive_period(user):
+        now = datetime.datetime.now()
+        return now - user['last_ping']
+
+
+
+
 
