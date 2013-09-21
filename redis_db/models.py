@@ -1,0 +1,3 @@
+
+class RedisDocument(object):
+    pass
