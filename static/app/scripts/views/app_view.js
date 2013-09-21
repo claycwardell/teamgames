@@ -11,9 +11,9 @@ define([
     var AppViewView = Backbone.View.extend({
         template: JST['app/scripts/templates/app_view.hbs'],
         events: {
-        	'click #submit_message': 	'on_submit_message_click',
-        	'keydown #text_input': 		'message_key_down',
-        	'click #submit_username': 	'on_submit_username_click'
+        	'click #submit-message': 	'on_submit_message_click',
+        	'keydown #text-input': 		'message_key_down',
+        	'click #submit-username': 	'on_submit_username_click'
         },
         initialize: function(options){
         	_.bindAll(this, 'render', 'append_message', 'on_submit_message_click',  
@@ -24,19 +24,25 @@ define([
 
 
         	this.model.bind('change', this.render);
+
+
+        	// chat functions
         	// get username
         	this.model.fetch();
 
-        	this.model.bind('new_message', this.append_message);
+        	this.model.on('new_message', this.append_message);
 
 
         	// init setup for username once model has synced
-        	this.model.once('change', function(){
+        	this.model.once('change:username', function(){
         		if(this.model.get('username')=="None"){
 			        this.start_request_username();
 			    }
         	}, 
         	this);
+
+        	
+        	this.model.start_messages_text();
         	
 
 		    
@@ -44,9 +50,28 @@ define([
         render: function(){
         	this.$el.html(this.template(this.model.toJSON()));
         	$('body').addClass(this.model.get('team'));
+        	
         }, 
+        // chess functions
+
+
+
+        // chat functions
         append_message: function(data_as_string){
+        	var scrolled_to_btm = this.$('#chat-box').scrollTop()==this.$('#chat-box').height()
         	this.$('#chat-box').append(data_as_string);
+        	this.scroll_behavior(scrolled_to_btm);
+        },
+        scroll_behavior: function(scrolled_to_btm){
+        	// if scroll bar is at btm, keep it at btm
+        	if(scrolled_to_btm){
+        		var a = 1+2;
+        	}
+        },
+        on_chat_box_scroll_debouced: function(e){
+        	// if we are at the end, keep scroll bar at btm
+
+        	// if we are not at the end, keep scroll bar in current position
         },
         message_key_down: function(e){
         	if(e.keyCode == 13){
