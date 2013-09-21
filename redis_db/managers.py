@@ -106,8 +106,10 @@ class PlayerManager(RedisDbManager):
     def set(cls, team, username):
         cls.unassign_player(team)
         user_dict = UsernameManager.get(username)
-        PlayerManager.set(user_dict['username'], user_dict)
-        return super(PlayerManager, cls).set(team, username)
+        if user_dict is not None:
+            PlayerManager.set(user_dict['username'], user_dict)
+            return super(PlayerManager, cls).set(team, username)
+
 
     @classmethod
     def get(cls, team):
@@ -124,7 +126,6 @@ class PlayerManager(RedisDbManager):
 
     @classmethod
     def check_for_inactive_players(cls):
-        pdb.set_trace()
         now = datetime.datetime.now()
         player_map = cls.get_all_players()
         for team in player_map:

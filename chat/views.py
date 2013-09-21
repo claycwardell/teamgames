@@ -7,7 +7,7 @@ from decorators import jsonify, require_username
 import logging
 
 import pusher
-from redis_db.managers import UsernameManager, TeamManager
+from redis_db.managers import UsernameManager, TeamManager, PlayerManager
 
 pusher_instance = pusher.Pusher(app_id=PUSHER_APP_ID, key=PUSHER_KEY, secret=PUSHER_SECRET)
 
@@ -60,7 +60,9 @@ def new_message(request):
     user_dict = request.session_user
     if message is not None:
         team = request.session.get(SESSION_TEAM_KEY)
-        pusher_instance[team].trigger('new-message', {"message" : message, "sender" : user_dict['username'], "player" : user_dict['player']})
+        team_player_dict = PlayerManager.get(team)
+        is_player = user_dict['username'] == team_player_dict['username']
+        pusher_instance[team].trigger('new-message', {"message" : message, "sender" : user_dict['username'], "player" : is_player})
         return {"success" : True}
     return {"success" : False}
 
