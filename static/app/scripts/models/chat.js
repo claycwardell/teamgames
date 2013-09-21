@@ -24,8 +24,8 @@ define([
 			this.on('change:team', this.save_team);
 
 			// DEBUGGING, remove later
-			this.set('team', 'red');
-			this.start_active_check_timer();
+			//this.set('team', 'red');
+			//this.start_active_check_timer();
 		},
 		start_messages_text: function(){
 			var that = this;
