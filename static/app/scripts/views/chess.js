@@ -78,6 +78,7 @@ define([
 					row_string+='['+piece_type+']';
 
 					if(piece_type!=' '){
+						/*
 						if(game_piece.owner=='white'){
 
 						}
@@ -89,6 +90,7 @@ define([
 						drawing.onload = function() {
 						   context.drawImage(drawing,0,0);
 						}
+						*/
 					}
 				}
 				console.log(row_string);
