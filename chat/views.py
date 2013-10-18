@@ -1,4 +1,6 @@
 import datetime
+from redis_db.business import UserManager
+from redis_db.exceptions import AlreadyExistsException
 from teamgames_site.consts import FIRST_CUTOFF, SECOND_CUTOFF, THIRD_CUTOFF, CUTOFF_TO_TEAM_MAP, SESSION_TEAM_KEY, SESSION_USERNAME_KEY
 from teamgames_site.settings import PUSHER_APP_ID, PUSHER_KEY, PUSHER_SECRET
 import pdb
@@ -7,7 +9,6 @@ from decorators import jsonify, require_username
 import logging
 
 import pusher
-from redis_db.managers import UsernameManager, TeamManager, PlayerManager
 
 pusher_instance = pusher.Pusher(app_id=PUSHER_APP_ID, key=PUSHER_KEY, secret=PUSHER_SECRET)
 
@@ -23,9 +24,10 @@ def home(request):
     username = request.session.get("username")
 
     if username:
-        UsernameManager.initial_set(username)
-        if team:
-            TeamManager.add_to_team(username, team)
+        try:
+            UserManager.create_new_user(username, team)
+        except AlreadyExistsException:
+            logging.info("User with username: %s already exists, not creating", username)
 
     ctx = {
         'team' : team,
@@ -41,15 +43,11 @@ def set_username(request):
     username = request.POST.get("username")
     team = request.session.get(SESSION_TEAM_KEY)
     logging.info("username: %s", username)
-    # check if available once redis is up
-    redis_key = UsernameManager.get_compound_key(username, team)
-    available = not UsernameManager.get(redis_key)
-    if available:
-        request.session[SESSION_USERNAME_KEY] = username
-        UsernameManager.initial_set(username)
-
+    try:
+        UserManager.create_new_user(username, team)
         return {'success' : True}
-    return {'success' : False}
+    except AlreadyExistsException:
+        return {'success' : False}
 
 @jsonify
 @csrf_exempt
@@ -57,12 +55,10 @@ def set_username(request):
 def new_message(request):
     message = request.POST.get("message")
     logging.info("message: %s" % message)
-    user_dict = request.session_user
+    user = request.session_user
     if message is not None:
         team = request.session.get(SESSION_TEAM_KEY)
-        team_player_dict = PlayerManager.get(team)
-        is_player = user_dict['username'] == team_player_dict['username']
-        pusher_instance[team].trigger('new-message', {"message" : message, "sender" : user_dict['username'], "player" : is_player})
+        pusher_instance[team].trigger('new-message', {"message" : message, "sender" : user.username, "player" : user.is_player})
         return {"success" : True}
     return {"success" : False}
 

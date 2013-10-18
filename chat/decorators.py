@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.utils import simplejson as json
 import functools
 import chat.views
-from redis_db.managers import UsernameManager
+from redis_db.business import UserManager
 from teamgames_site.consts import SESSION_USERNAME_KEY
 
 
@@ -25,12 +25,11 @@ def require_username(func):
         username = request.session.get(SESSION_USERNAME_KEY)
         if not username:
             return chat.views.home(request)
-        user_dict = UsernameManager.get(username)
-        if user_dict is None:
-            UsernameManager.initial_set(username)
-            user_dict = UsernameManager.get_default_user_object(username)
+        user = UserManager.get_user(username)
+        if user is None:
+            user = UserManager.create_new_user(username)
 
-        request.session_user = user_dict
+        request.session_user = user
 
         return func(request, *args, **kwargs)
     return wrap
