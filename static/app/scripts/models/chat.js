@@ -25,7 +25,7 @@ define([
 
 			// DEBUGGING, remove later
 			//this.set('team', 'red');
-			//this.start_active_check_timer();
+			this.start_active_check_timer();
 		},
 		start_messages_text: function(){
 			var that = this;
@@ -167,7 +167,7 @@ define([
 			var that = this;
 		    $.ajax({
 		        type: 'GET',
-		        url: './api/chat/ping',
+		        url: './api/chat/ping/',
 		        success: function(resp){
 		            if(resp.success){
 		                if(resp.player){

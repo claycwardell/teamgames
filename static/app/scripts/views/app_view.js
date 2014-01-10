@@ -4,8 +4,10 @@ define([
     'jquery',
     'underscore',
     'backbone',
+    'views/chess',
+    'views/chat',
     'templates'
-], function ($, _, Backbone, JST) {
+], function ($, _, Backbone, ChessView, ChatView, JST) {
     'use strict';
 
     var AppViewView = Backbone.View.extend({
@@ -23,14 +25,15 @@ define([
         	this.render();
 
 
-        	this.model.bind('change', this.render);
+        	this.model.bind('change:team', this.add_team);
 
 
-        	// chat functions
+        	// CHAT SETUP
+
         	// get username
         	this.model.fetch();
 
-        	this.model.on('new_message', this.append_message);
+        	this.model.bind('new_message', this.append_message);
 
 
         	// init setup for username once model has synced
@@ -41,15 +44,39 @@ define([
         	}, 
         	this);
 
+        	//DEBUG
+        	//this.model.start_messages_text();
         	
-        	this.model.start_messages_text();
-        	
+
+            // CHESS SETUP
+            this.setup_game();
+
 
 		    
         },
+        setup_game: function(){
+            if(typeof(this.game_view)=="undefined"){
+                this.game_view = new ChessView({
+                    el: this.$('#chess_container')
+                });
+                this.$('#chess_container').append(this.game_view.el);
+                this.game_view.bind('player_changed', this.player_changed)
+            }
+            this.game_view.render();
+        },
+        player_changed: function(user_is_player_bool){
+            if( user_is_player_bool ){
+                alert('you are the player')
+            }
+            else{
+                alert('you are no longer the player');
+            }
+        },
+        add_team: function(){
+            $('body').addClass(this.model.get('team'));
+        },
         render: function(){
         	this.$el.html(this.template(this.model.toJSON()));
-        	$('body').addClass(this.model.get('team'));
         	
         }, 
         // chess functions
