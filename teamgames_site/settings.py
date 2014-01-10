@@ -1,5 +1,8 @@
 # Django settings for teamgames_services project.
 import os
+import logging
+
+LOGGER = logging.getLogger("%s.%s" % ('hinge', __name__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -33,6 +36,8 @@ DATABASES = {
 TIME_ZONE = 'America/New_York'
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+print PROJECT_ROOT
 
 
 # Language code for this installation. All choices can be found here:
@@ -169,8 +174,21 @@ REDIS_PORT = 6380
 REDIS_HOST = 'localhost'
 REDIS_DB = 0
 
-
 #PUSHER
 PUSHER_APP_ID =  '41450'
 PUSHER_KEY = 'ae35d633bac49aecadaf'
 PUSHER_SECRET = '0aeed0cdd5cfe2fd5acd'
+
+
+env = os.getenv("ENV")
+if env == 'dev':
+    from config.env.dev import *
+else:
+    raise Exception("Invalid or missing environment variable: %s" % str(env))
+
+import mongoengine
+db_name = DOCUMENT_DATABASE.get("NAME")
+try:
+    mongoengine.connect(db_name, host=DOCUMENT_DATABASE.get("HOST"))
+except Exception, e:
+    LOGGER.error("Impossible to connect to MongoDB: %s" % e)
