@@ -3,10 +3,6 @@ from teamgames_site import consts
 import datetime
 
 
-
-
-
-
 class User(mongoengine.Document):
     username = mongoengine.StringField(primary_key=True)
     team = mongoengine.StringField(choices=consts.TEAM_CHOICES, required=True)
