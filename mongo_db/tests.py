@@ -23,7 +23,6 @@ class UserManagerTest(unittest.TestCase):
             UserManager.assign_player(team)
 
 
-
     def test_assign_player(self):
         for team in consts.TEAM_CHOICES:
             player = User.objects.filter(is_player=True, team=team).get()

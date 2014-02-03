@@ -72,8 +72,12 @@ def new_message(request):
 @csrf_exempt
 @require_username
 def receive_ping(request):
+    RUN_ASYNC = True
     username = request.username
-    receive_ping_async.delay(username)
+    if RUN_ASYNC:
+        receive_ping_async.delay(username)
+    else:
+        receive_ping_async(username)
     return {"success" : True}
 
 
