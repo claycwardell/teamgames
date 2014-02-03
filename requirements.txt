@@ -9,3 +9,6 @@ pymongo==2.6.3
 redis==2.7.2
 requests==1.2.0
 wsgiref==0.1.2
+chesstools==0.1.7
+django-rq==0.4.5
+rq==0.3.6

@@ -1,6 +1,7 @@
 # Django settings for teamgames_services project.
 import os
 import logging
+import sys
 
 LOGGER = logging.getLogger("%s.%s" % ('hinge', __name__))
 
@@ -133,7 +134,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'chat',
-    'chess'
+    'chess',
+    'mongo_db',
+    'appcontrol',
+    'django_rq'
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -158,27 +162,39 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            #'filters': ['info_and_below'],
+            'stream': sys.stdout
+        },
+        #'console_err': {
+        #    'level': 'WARNING',
+        #    'class': 'logging.StreamHandler',
+        #    'formatter': 'simple',
+        #    'stream': sys.stderr
+        #},
     },
+
+    'formatters': {
+            'simple': {'format': '%(levelname)-8s:p%(process)d:%(name)s> %(message)s'},
+            },
+
     'loggers': {
         'django.request': {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
         },
+        'teamgames_logger': {
+            'level': os.getenv('LOG_MIN_LEVEL', 'DEBUG'),
+            'handlers': ['console'],
+            'propagate': False
+        },
     }
 }
-
-
-REDIS_PORT = 6380
-REDIS_HOST = 'localhost'
-REDIS_DB = 0
-
-#PUSHER
-PUSHER_APP_ID =  '41450'
-PUSHER_KEY = 'ae35d633bac49aecadaf'
-PUSHER_SECRET = '0aeed0cdd5cfe2fd5acd'
-
 
 env = os.getenv("ENV")
 if env == 'dev':
@@ -192,3 +208,6 @@ try:
     mongoengine.connect(db_name, host=DOCUMENT_DATABASE.get("HOST"))
 except Exception, e:
     LOGGER.error("Impossible to connect to MongoDB: %s" % e)
+
+print "Connected to database: %s" % DOCUMENT_DATABASE
+from config.app import *

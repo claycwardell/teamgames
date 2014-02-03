@@ -7,7 +7,8 @@ class MainMiddleware(object):
     def process_view(self, request, view_func, view_args, view_kwargs):
         if not request.session.get(SESSION_TEAM_KEY):
             request.session[SESSION_TEAM_KEY] = self._get_team_from_ip(request.META['REMOTE_HOST'])
-
+        request.team = request.session[SESSION_TEAM_KEY]
+        request.username = request.session.get(SESSION_USERNAME_KEY)
         return
 
     @staticmethod
